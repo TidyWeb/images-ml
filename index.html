@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A plain-English SciKit Style guide to image analysis, image EDA, image files and dataset splits.">
+<title>Image analysis: look at pictures before modelling</title>
+<style>
+:root{--ink:#111;--paper:#f6f6f2;--white:#fff;--soft:#e9e9e3;--line:#c7c7bf;--quiet:#64645e;--signal:#d9ff38;--mono:'DM Mono',ui-monospace,SFMono-Regular,Consolas,monospace;--sans:'Instrument Sans','Avenir Next','Helvetica Neue',sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--paper);font:17px/1.55 var(--sans)}a{color:inherit}code{font:.88em var(--mono)}h1,h2,h3,p{margin-top:0}.skip{position:fixed;z-index:20;top:-4rem;left:1rem;padding:.5rem .75rem;color:var(--ink);background:var(--signal)}.skip:focus{top:0}
+.shell{display:grid;grid-template-columns:14.25rem minmax(0,1fr);min-height:100vh}.rail{position:sticky;top:0;display:flex;flex-direction:column;height:100vh;padding:1.25rem 1rem 1rem;color:#f4f4ee;background:var(--ink)}.rail-top{display:flex;gap:.7rem;align-items:center;padding-bottom:1.15rem;border-bottom:1px solid #4a4a45;text-decoration:none}.mark{display:grid;width:2.35rem;height:2.35rem;place-items:center;color:var(--ink);background:var(--signal);font:700 .72rem/1 var(--mono);letter-spacing:-.08em}.rail-kicker,.rail-title{margin:0}.rail-kicker{color:var(--signal);font:500 .61rem/1.25 var(--mono);letter-spacing:.09em;text-transform:uppercase}.rail-title{margin-top:.22rem;font-size:.88rem;font-weight:600;line-height:1.15}.rail nav{margin-top:1.5rem}.rail ol{margin:0;padding:0;list-style:none}.rail li+li{margin-top:.12rem}.rail li a{display:grid;grid-template-columns:1.6rem 1fr;gap:.42rem;padding:.5rem .3rem;color:#d3d3cc;text-decoration:none;font-size:.79rem;line-height:1.25;border-left:2px solid transparent}.rail li a:hover,.rail li a:focus,.rail li a[aria-current="page"]{color:#fff;background:#242421;border-left-color:var(--signal);outline:0}.rail li span{color:var(--signal);font:.61rem/1.55 var(--mono)}.rail-note{margin:1.2rem .3rem;color:#9d9d95;font-size:.72rem;line-height:1.45}.tidy{display:flex;gap:.52rem;align-items:center;margin-top:auto;padding:.9rem .25rem 0;color:#a8a8a0;border-top:1px solid #4a4a45;font-size:.65rem;line-height:1.25;text-decoration:none}.tidy img{width:1.7rem;height:1.7rem;object-fit:contain;filter:grayscale(1) contrast(1.1)}
+main{min-width:0;overflow:hidden;background-image:linear-gradient(#0000 95%,rgb(17 17 17/.045) 95%),linear-gradient(90deg,#0000 95%,rgb(17 17 17/.045) 95%);background-size:100% 2rem,2rem 100%}.topline{display:flex;justify-content:space-between;gap:1rem;padding:.72rem clamp(1.25rem,5vw,5rem);color:#e7e7e2;background:var(--ink);font:.65rem var(--mono);letter-spacing:.07em;text-transform:uppercase}.topline span:last-child{color:var(--signal)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(23rem,.78fr);gap:clamp(1.5rem,4vw,5rem);align-items:end;max-width:91rem;margin:auto;padding:clamp(3rem,7vw,8rem) clamp(1.25rem,5vw,5rem) 4rem}.eyebrow{margin:0 0 .85rem;color:var(--quiet);font:.67rem var(--mono);letter-spacing:.1em;text-transform:uppercase}h1{max-width:50rem;margin-bottom:1.4rem;font-size:clamp(3.2rem,8.2vw,7.8rem);font-weight:600;letter-spacing:-.075em;line-height:.86}h1 .outline{color:transparent;-webkit-text-stroke:1.6px var(--ink)}.lede{max-width:38rem;margin-bottom:0;font-size:clamp(1.06rem,1.6vw,1.28rem);line-height:1.48}.model-card{position:relative;display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.45rem;align-items:center;min-height:13rem;padding:1rem;color:#f6f6f2;background:var(--ink);outline:1px solid var(--ink);outline-offset:7px}.model-card:before{position:absolute;top:.55rem;left:.7rem;content:'THE WORKING PICTURE';color:var(--signal);font:.6rem var(--mono);letter-spacing:.09em}.model-card b{display:block;padding:1.35rem .35rem .5rem;text-align:center;font:600 clamp(.82rem,1.4vw,1.05rem)/1.05 var(--sans)}.model-card b small{display:block;margin-top:.38rem;color:#aaa;font:.62rem var(--mono)}.model-card i{color:var(--signal);font:1.8rem/1 var(--mono);font-style:normal}.model-card .model{color:var(--ink);background:var(--signal)}.model-card footer{position:absolute;right:.8rem;bottom:.65rem;left:.8rem;margin:0;padding-top:.6rem;color:#adada6;border-top:1px solid #44443f;font:.63rem/1.35 var(--mono)}
+.content{max-width:91rem;margin:auto;padding:0 clamp(1.25rem,5vw,5rem) 5rem}section{scroll-margin-top:1rem}.section{display:grid;grid-template-columns:8rem minmax(0,1fr);gap:clamp(1rem,4vw,4.6rem);padding:5rem 0;border-top:1px solid var(--ink)}.section-index{padding-top:.45rem}.section-index b{display:block;font:500 2rem/.82 var(--mono);letter-spacing:-.12em}.section-index span{display:block;margin-top:.9rem;color:var(--quiet);font:.6rem/1.3 var(--mono);letter-spacing:.07em;text-transform:uppercase}.section-main{min-width:0}h2{max-width:55rem;margin-bottom:1rem;font-size:clamp(2.15rem,4.5vw,4.7rem);font-weight:600;letter-spacing:-.06em;line-height:.94}h3{font-size:1.32rem;line-height:1;letter-spacing:-.035em}.intro{max-width:47rem;margin-bottom:2.1rem;color:#363632;font-size:1.08rem}.bridge-note{max-width:55rem;margin-top:1rem;padding:.85rem 0 .15rem 1rem;border-left:3px solid var(--ink);font-size:.92rem}.bridge-note strong{background:var(--signal)}
+.workflow{display:grid;grid-template-columns:repeat(3,1fr);margin-top:2rem;border:1px solid var(--ink);background:var(--white)}.workflow .step{min-height:12rem;padding:1rem;border-right:1px solid var(--ink)}.workflow .step:last-child{border-right:0}.step-num{display:grid;width:2.2rem;height:2.2rem;place-items:center;border:1px solid var(--ink);font:.7rem var(--mono)}.step h3{margin-top:1.5rem}.step p{margin-bottom:0;color:var(--quiet);font-size:.86rem;line-height:1.38}.step.active{color:#f6f6f2;background:var(--ink)}.step.active .step-num{color:var(--ink);background:var(--signal);border-color:var(--signal)}.step.active p{color:#c4c4bd}.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.75rem;color:var(--quiet);font:.63rem var(--mono)}.legend span:before{display:inline-block;width:.55rem;height:.55rem;margin-right:.35rem;background:var(--ink);content:''}.legend span:last-child:before{background:var(--signal);border:1px solid var(--ink)}
+.terms{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink);border-left:1px solid var(--ink)}.term{min-height:11rem;padding:1rem;background:var(--white);border-right:1px solid var(--ink);border-bottom:1px solid var(--ink)}.term-label{color:var(--quiet);font:.6rem var(--mono);letter-spacing:.07em;text-transform:uppercase}.term h3{margin-top:1.6rem}.term p{margin-bottom:0;color:var(--quiet);font-size:.84rem;line-height:1.38}.terms-arrow{display:grid;min-height:7rem;place-items:center;color:var(--ink);background:var(--signal);border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);font:2rem var(--mono)}.terms-arrow small{display:block;margin-top:.3rem;font:.55rem var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.data-stage{display:grid;grid-template-columns:minmax(0,1fr) 13.5rem;border:1px solid var(--ink);background:var(--white)}.table-wrap{overflow-x:auto}.data-stage table{width:100%;min-width:37rem;border-collapse:collapse}.data-stage th,.data-stage td{padding:.78rem .9rem;text-align:left;border-bottom:1px solid var(--line)}.data-stage th{background:#efefeb;font:.63rem var(--mono);letter-spacing:.06em;text-transform:uppercase}.data-stage th:last-child{background:var(--signal)}.data-stage tbody tr:last-child td{border-bottom:0}.data-stage aside{display:flex;flex-direction:column;justify-content:space-between;padding:1rem;color:#f6f6f2;background:var(--ink)}.data-stage aside p{color:#a8a8a0;font:.64rem/1.35 var(--mono)}.target-symbol{color:var(--signal);font:600 5rem/.8 var(--sans);letter-spacing:-.12em}
+.code-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(15rem,.78fr);border:1px solid var(--ink);margin:1.5rem 0;background:var(--white)}pre{margin:0;padding:1.3rem;overflow:auto;color:#f0f0ec;background:var(--ink);font:.8rem/1.67 var(--mono)}.code-label{padding:.7rem 1rem;color:#c7d0d9;border-bottom:1px solid #48515b;background:var(--ink);font:.62rem var(--mono);letter-spacing:.07em;text-transform:uppercase}.code-notes{padding:1.2rem;background:var(--white)}.code-notes h3{margin-top:0}.code-notes ol{margin:1rem 0 0;padding:0;list-style:none;counter-reset:note}.code-notes li{position:relative;padding:0 0 1rem 2rem;color:#454540;font-size:.86rem;counter-increment:note}.code-notes li:before{position:absolute;left:0;display:grid;width:1.35rem;height:1.35rem;place-items:center;background:var(--signal);content:counter(note);color:var(--ink);font:.62rem var(--mono)}.code-notes li:last-child{padding-bottom:0}.output{margin:0;padding:1rem;color:#c7d0d9;background:#23231f;border-top:1px dashed #5c5c55;font:.76rem/1.5 var(--mono);white-space:pre-wrap}.output strong{color:var(--signal)}
+.task-list{border-top:1px solid var(--ink)}.task{display:grid;grid-template-columns:4rem minmax(9rem,.8fr) minmax(0,1.4fr) 9rem;gap:1rem;align-items:center;padding:1.1rem 0;border-bottom:1px solid var(--ink)}.task-number{font:.7rem var(--mono)}.task h3{margin:0;font-size:clamp(1.35rem,2.4vw,2rem)}.task p{margin:0;color:var(--quiet);font-size:.9rem}.task-output{justify-self:end;padding:.4rem .55rem;background:var(--signal);font:.62rem var(--mono);text-transform:uppercase}.task:last-child .task-output{color:#fff;background:var(--ink)}
+.split-board{display:grid;grid-template-columns:2fr 1fr;border:1px solid var(--ink);background:var(--white)}.sample-zone{padding:1rem}.sample-zone+.sample-zone{color:#f6f6f2;background:var(--ink);border-left:1px solid var(--ink)}.sample-zone .eyebrow{margin-bottom:1.3rem}.sample-zone+.sample-zone .eyebrow{color:var(--signal)}.sample-zone h3{margin-bottom:1rem}.sample-dots{display:grid;grid-template-columns:repeat(8,1fr);gap:.45rem;margin-bottom:1rem}.sample-dots i{display:block;aspect-ratio:1;background:var(--ink)}.sample-zone+.sample-zone .sample-dots{grid-template-columns:repeat(3,1fr)}.sample-zone+.sample-zone .sample-dots i{background:var(--signal)}.sample-zone p:last-child{margin-bottom:0;color:var(--quiet);font-size:.85rem}.sample-zone+.sample-zone p:last-child{color:#bebeb7}.metric-strip{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);border-top:0}.metric-strip p{margin:0;padding:.9rem 1rem;font-size:.85rem}.metric-strip p+p{border-left:1px solid var(--ink)}
+.tree{margin:1.4rem 0;padding:1rem;overflow:auto;color:#f0f0ec;background:var(--ink);font:.8rem/1.6 var(--mono)}.note{margin:1.25rem 0;padding:1rem;border-left:3px solid var(--ink);background:var(--white)}.warning{margin:1.25rem 0;padding:1rem;border-left:3px solid var(--signal);background:#ececd9}.before{display:grid;grid-template-columns:1fr 3rem 1fr;gap:1rem;align-items:center;margin:1.5rem 0}.state{padding:1rem;border:1px solid var(--ink);background:var(--white)}.state h3{margin:0 0 .45rem}.state p{margin:0;color:var(--quiet);font-size:.86rem}.state-arrow{text-align:center;font:1.6rem var(--mono)}
+details{border-top:1px solid var(--ink);padding:1rem 0}details:last-of-type{border-bottom:1px solid var(--ink)}summary{cursor:pointer;font-weight:600}summary:before{display:inline-block;width:1.5rem;color:var(--signal);content:'+';font:1rem var(--mono)}details[open] summary:before{content:'−'}details p{max-width:50rem;margin:.8rem 0 0;padding-left:1.5rem;color:var(--quiet)}.sources{padding-top:4rem;border-top:1px solid var(--ink)}.sources li{margin:.45rem 0;font-size:.92rem}.source-note{margin-top:1.5rem;padding:1rem;color:#363632;border:1px solid var(--ink);background:var(--white);font-size:.9rem}footer.page-footer{max-width:91rem;margin:auto;padding:2rem clamp(1.25rem,5vw,5rem) 4rem;color:var(--quiet);font-size:.72rem}
+@media(max-width:1280px){.terms{grid-template-columns:repeat(2,1fr)}.task{grid-template-columns:3rem 1fr 1fr}.task-output{grid-column:3}}@media(max-width:760px){.shell{display:block}.rail{position:relative;display:grid;grid-template-columns:1fr auto;height:auto;padding:.85rem 1rem}.rail nav,.rail-note{display:none}.rail-top{padding:0;border:0}.tidy{margin:0;padding:0;border:0}.tidy span{display:none}.topline span:first-child{display:none}.hero{grid-template-columns:1fr;padding-block:3.5rem}.section{grid-template-columns:1fr;gap:1rem;padding-block:3.5rem}.section-index{display:flex;gap:.75rem;align-items:baseline;padding:0}.section-index span{margin:0}.workflow{grid-template-columns:1fr}.workflow .step{min-height:0;border-right:0;border-bottom:1px solid var(--ink)}.workflow .step:last-child{border-bottom:0}.data-stage,.code-grid,.split-board,.metric-strip{grid-template-columns:1fr}.data-stage aside{min-height:8rem}.code-notes{border-top:1px solid var(--ink)}.task{grid-template-columns:2.8rem 1fr;gap:.7rem}.task p,.task-output{grid-column:2}.task-output{justify-self:start}.sample-zone+.sample-zone,.metric-strip p+p{border-top:1px solid var(--ink);border-left:0}.before{grid-template-columns:1fr}.state-arrow{transform:rotate(90deg)}.terms{grid-template-columns:1fr}.term{min-height:0}.model-card{min-height:11rem}.model-card b{padding-top:1.8rem}}@media(prefers-reduced-motion:no-preference){.hero>*,.section{animation:settle .55s both}@keyframes settle{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}}
+</style>
+<style>
+.rail-kicker,.rail-title{display:block}
+.hero>*,.section{animation:none!important;opacity:1!important;transform:none!important}
+@media(max-width:760px){.model-card{min-height:15rem}.model-card footer{font-size:.58rem}}
+@media print{.skip{display:none}.house-flow,.role-list,.split-bar,.tree{break-inside:avoid;page-break-inside:avoid}}
+.role-head{color:var(--quiet);font:.63rem var(--mono);letter-spacing:.06em;text-transform:uppercase}.role-head span{font-size:inherit}
+.tree{white-space:pre}
+@media(max-width:760px){.role-list .role-head{display:none}.role-row span::before{display:block;margin-bottom:.2rem;color:var(--quiet);font:.58rem var(--mono);letter-spacing:.05em;text-transform:uppercase;content:attr(data-label)}}
+.house-flow{display:grid;grid-template-columns:1.25fr 1fr 1fr;margin:2rem 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--white)}
+.house-stage{padding:1.2rem;border-right:1px solid var(--ink)}.house-stage:last-child{border-right:0}.house-stage h3{margin:0 0 .65rem;font-size:1.12rem}.house-stage p{margin:.8rem 0 0;color:var(--quiet);font-size:.86rem;line-height:1.45}.house-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;align-items:end}.house-gallery figure{margin:0;text-align:center}.house-gallery svg{width:100%;max-width:6.2rem;height:auto}.house-gallery figcaption{font:.58rem var(--mono);color:var(--quiet)}.house-art{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.house-average{display:block;width:100%;height:auto;max-width:16rem;margin:.5rem auto}.house-variation{display:block;width:100%;height:auto;max-width:16rem;margin:.5rem auto;background:var(--ink)}.house-caption{grid-column:1/-1;margin:0;padding:.7rem 1.2rem;color:var(--quiet);border-top:1px dashed var(--line);font-size:.76rem}.plain-first{max-width:52rem;margin:1.2rem 0;padding-left:1rem;border-left:3px solid var(--ink)}.pixel-steps{display:grid;grid-template-columns:repeat(3,1fr);margin:1rem 0;border-top:1px solid var(--ink);border-left:1px solid var(--ink)}.pixel-steps p{margin:0;padding:.8rem;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);font-size:.86rem}.pixel-steps strong{display:block;margin-bottom:.3rem;font-family:var(--mono)}.role-list{margin:1.5rem 0;border-top:1px solid var(--ink)}.role-row{display:grid;grid-template-columns:9rem 1fr 1fr;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--ink)}.role-row strong{font-family:var(--mono)}.role-row span{font-size:.9rem}.split-bar{display:flex;min-height:4rem;margin:1rem 0;border:1px solid var(--ink);color:var(--ink);font:.72rem var(--mono);text-align:center}.split-bar span{display:grid;place-items:center;padding:.4rem;border-right:1px solid var(--ink)}.split-bar span:last-child{border-right:0}.split-train{flex:65;background:#fff}.split-validation{flex:15;background:#e9e9e3}.split-test{flex:20;background:var(--signal)}.ratio-caption{margin-top:-.55rem;color:var(--quiet);font-size:.8rem}.code-output{margin:0;padding:1rem;color:#c7d0d9;background:#23231f;border-top:1px dashed #5c5c55;font:.76rem/1.5 var(--mono);white-space:pre-wrap}.code-output strong{color:var(--signal)}
+@media(max-width:760px){.house-flow{grid-template-columns:1fr}.house-stage{border-right:0;border-bottom:1px solid var(--ink)}.house-stage:last-of-type{border-bottom:0}.house-gallery{max-width:22rem}.pixel-steps{grid-template-columns:1fr}.role-row{grid-template-columns:1fr;gap:.25rem}.split-bar{min-height:5rem;font-size:.62rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to the guide</a>
+<div class="shell">
+<aside class="rail" aria-label="Guide navigation">
+<a class="rail-top" href="#top" aria-label="Image analysis guide home">
+<span class="mark">X→y</span>
+<span>
+<span class="rail-kicker">SciKit Style</span>
+<span class="rail-title">Image analysis</span>
+</span>
+</a>
+<nav>
+<ol>
+<li>
+<a href="#picture" aria-current="page">
+<span>00</span>
+<b>Working picture</b>
+</a>
+</li>
+<li>
+<a href="#foundations">
+<span>01</span>
+<b>Python moves</b>
+</a>
+</li>
+<li>
+<a href="#toy">
+<span>02</span>
+<b>Toy datasets</b>
+</a>
+</li>
+<li>
+<a href="#files">
+<span>03</span>
+<b>Real files</b>
+</a>
+</li>
+<li>
+<a href="#splits">
+<span>04</span>
+<b>Dataset splits</b>
+</a>
+</li>
+<li>
+<a href="#checks">
+<span>05</span>
+<b>Self-check</b>
+</a>
+</li>
+<li>
+<a href="#sources">
+<span>06</span>
+<b>Source trail</b>
+</a>
+</li>
+</ol>
+</nav>
+<p class="rail-note">A source-faithful guide to the image-analysis lessons, with Python foundations made visible before the notebook calls.</p>
+<a class="tidy" href="https://github.com/TidyWeb/" target="_blank" rel="noreferrer">
+<img src="assets/putting-it-all-together/tidyweb_logo.png" alt="">
+<span>TidyWeb<br>course learning system</span>
+</a>
+</aside>
+<main id="content">
+<div class="topline">
+<span>CODE INSTITUTE · ADVANCED DATA ANALYSIS</span>
+<span>IMAGE ANALYSIS / 01–03</span>
+</div>
+<header class="hero" id="top">
+<div>
+<p class="eyebrow">The working picture</p>
+<h1>Look at pictures<br>
+<span class="outline">before modelling</span>
+</h1>
+<p class="lede">Here we learn to look at a collection of pictures, understand the labels attached to them, and prepare the pictures for a model to use.</p>
+</div>
+<div class="model-card" aria-label="The image-analysis workflow">
+<b>pictures<small>with labels</small>
+</b>
+<i>→</i>
+<b class="model">look closely<small>count · compare · measure</small>
+</b>
+<i>→</i>
+<b>get ready<small>arrays · separate groups</small>
+</b>
+<footer>First find out what the pictures show and how they differ. Then prepare them for the next stage.</footer>
+</div>
+</header>
+<div class="content">
+<section class="section" id="picture">
+<div class="section-index">
+<b>00</b>
+<span>Start here</span>
+</div>
+<div class="section-main">
+<h2>Why look at pictures before using them?</h2>
+<p class="intro">A spreadsheet has rows and columns. A picture has a grid of tiny dots called pixels. Each pixel stores a brightness value (and, for colour pictures, colour values too). Before asking a computer to recognise pictures, we should check what is in the collection and how the pictures differ.</p>
+<div class="workflow">
+<div class="step active">
+<span class="step-num">01</span>
+<h3>Look at the collection</h3>
+<p>Count each label. Look at examples. Notice what stays the same and what changes.</p>
+</div>
+<div class="step">
+<span class="step-num">02</span>
+<h3>Make pictures fit</h3>
+<p>Real pictures may have different sizes. Resize them so they can be handled together.</p>
+</div>
+<div class="step">
+<span class="step-num">03</span>
+<h3>Keep the groups straight</h3>
+<p>Put separate pictures aside for learning, practice checks and the final check.</p>
+</div>
+</div>
+<div class="legend">
+<span>the lesson starts by looking</span>
+<span>later steps prepare the pictures</span>
+</div>
+<p class="bridge-note">
+<strong>What does EDA mean here?</strong> Exploratory data analysis means looking through data before modelling. With pictures, we count the labels, look at real examples and check whether the pictures match their labels. We also look for differences in size and in the places that are light or dark. It is the same first question as with a spreadsheet—“What is in this data?”—but pictures need to be inspected as pictures.</p>
+</div>
+</section>
+<section class="section" id="foundations">
+<div class="section-index">
+<b>01</b>
+<span>Python moves</span>
+</div>
+<div class="section-main">
+<h2>A few Python tools you will see often</h2>
+<p class="intro">Before the code words, keep the job in mind: we are selecting pictures, checking their labels, and repeating the same check for many pictures. These Python features let the notebook do those jobs.</p>
+<div class="terms">
+<div class="term">
+<span class="term-label">tool</span>
+<h3>
+<code>import</code>
+</h3>
+<p>Make a toolbox available. <code>import os</code> gives Python tools for looking inside folders.</p>
+</div>
+<div class="term">
+<span class="term-label">name</span>
+<h3>
+<code>=</code>
+</h3>
+<p>Store a value under a name. Here, <code>pointer</code> remembers picture number 27.</p>
+</div>
+<div class="term">
+<span class="term-label">repeat</span>
+<h3>
+<code>for</code>
+</h3>
+<p>Repeat the indented instructions for each folder, label or picture.</p>
+</div>
+<div class="term">
+<span class="term-label">select</span>
+<h3>
+<code>[]</code>
+</h3>
+<p>Pick something from a collection. <code>x_train[27]</code> picks picture number 27.</p>
+</div>
+<div class="term">
+<span class="term-label">reusable</span>
+<h3>
+<code>def</code>
+</h3>
+<p>Give reusable instructions a name. The names in its brackets are the inputs it can accept.</p>
+</div>
+<div class="term">
+<span class="term-label">count</span>
+<h3>
+<code>len()</code>
+</h3>
+<p>Count items in a list or folder. For example, count the files inside one label folder.</p>
+</div>
+<div class="terms-arrow">→<small>towards a question</small>
+</div>
+<div class="term">
+<span class="term-label">result</span>
+<h3>
+<code>print()</code>
+</h3>
+<p>Show text or a result underneath the code in the notebook.</p>
+</div>
+</div>
+<h3>One picture and its label</h3>
+<p>
+Think of two numbered stacks of cards. <code>x_train</code> is the picture stack; <code>y_train</code> is the answer stack. The number in square brackets is the position: picture 27 and label 27 belong together. In Python these are NumPy arrays, not ordinary lists, but the matching-position idea is the same.</p>
+<div class="code-grid">
+<div>
+<div class="code-label">Select one picture and show its details</div>
+<pre>
+<code>pointer = 27
+
+print(f"array pointer = {pointer}")
+print(f"x_train[{pointer}] shape: {x_train[pointer].shape}")
+print(f"label: {y_train[pointer]}")
+
+plt.imshow(x_train[pointer], cmap="gray")
+plt.show()</code>
+</pre>
+<div class="code-output"><strong>What this prints for the lesson's MNIST example</strong>
+array pointer = 27
+x_train[27] shape: (28, 28)
+label: 3
+
+Then Matplotlib displays that 28-by-28 handwritten 3.</div>
+</div>
+<aside class="code-notes">
+<h3>Read the repeated word <code>pointer</code></h3>
+<ol>
+<li>
+<code>f"...{pointer}..."</code> puts the value 27 into the printed sentence. The <code>f</code> tells Python to fill in the braces.</li>
+<li>
+<code>x_train[pointer]</code> uses 27 as the picture's position. <code>y_train[pointer]</code> uses the same position to get its label.</li>
+<li>
+<code>.shape</code> tells us the picture's size: 28 rows of pixels by 28 columns.</li>
+<li>
+<code>cmap="gray"</code> tells <code>imshow()</code> to display dark and light pixels in shades of grey.</li>
+</ol>
+</aside>
+</div>
+</div>
+</section>
+<section class="section" id="toy">
+<div class="section-index">
+<b>02</b>
+<span>Toy datasets</span>
+</div>
+<div class="section-main">
+<h2>Ask four simple questions about the pictures</h2>
+<p class="intro">The course first uses MNIST: 28-by-28 pictures of handwritten digits. Then it asks you to practise the same checks with Fashion-MNIST: small pictures of clothing. “Toy dataset” means a prepared example for learning the steps; it does not mean that the data is useless. In both datasets, the pictures and their labels already come in matching arrays.</p>
+<div class="task-list">
+<div class="task">
+<span class="task-number">02.1</span>
+<h3>How many of each?</h3>
+<p>Count the labels. This tells us whether one kind of picture appears much more often.</p>
+<span class="task-output">count</span>
+</div>
+<div class="task">
+<span class="task-number">02.2</span>
+<h3>What do they look like?</h3>
+<p>Put several pictures with the same label side by side and compare them.</p>
+<span class="task-output">look</span>
+</div>
+<div class="task">
+<span class="task-number">02.3</span>
+<h3>What is typical? What changes?</h3>
+<p>For one label, compare the brightness at the same pixel position across all its pictures.</p>
+<span class="task-output">compare</span>
+</div>
+<div class="task">
+<span class="task-number">02.4</span>
+<h3>How do two kinds differ?</h3>
+<p>Compare the average picture for one label with the average for another.</p>
+<span class="task-output">difference</span>
+</div>
+</div>
+<div class="code-grid">
+<div>
+<div class="code-label">Now the Python: count the Fashion-MNIST labels</div>
+<pre>
+<code>pd.Series(y_practice).value_counts().sort_index().plot(kind="bar")
+plt.xlabel("Label")
+plt.ylabel("Number of images")
+plt.show()</code>
+</pre>
+<div class="code-output"><strong>What the chart tells you</strong>
+Each bar is one clothing label. Compare bar heights to see whether the training data contains similar numbers of each kind.</div>
+</div>
+<aside class="code-notes">
+<h3>Read this line by line</h3>
+<ol>
+<li>
+<code>y_practice</code> holds one clothing label for each picture.</li>
+<li>
+<code>value_counts()</code> counts how many times each label appears.</li>
+<li>
+<code>sort_index()</code> puts the labels in number order.</li>
+<li><code>plot(kind="bar")</code> draws one bar for each count; <code>plt.show()</code> displays it.</li>
+</ol>
+</aside>
+</div>
+<div class="code-grid">
+<div>
+<p>Next, ask to see several examples of one label. In Fashion-MNIST, label <code>8</code> means a bag.</p>
+<div class="code-label">Call the supplied picture-grid function</div>
+<pre>
+<code>image_montage_data_as_array(
+    X=x_practice,
+    y=y_practice,
+    label_to_display=8,
+    nrows=3,
+    ncols=5,
+    figsize=(15, 10),
+)</code>
+</pre>
+<div class="code-output"><strong>What you should see</strong>
+A grid with 3 rows and 5 columns of Fashion-MNIST bags. <code>X</code> supplies pictures; <code>y</code> supplies their labels; <code>8</code> chooses the bag pictures. Fifteen spaces means at most fifteen pictures.</div>
+</div>
+<aside class="code-notes">
+<h3>Look at the pictures</h3>
+<ol>
+<li>Can you recognise a bag in each picture?</li>
+<li>What stays similar from bag to bag?</li>
+<li>What changes, such as shape, angle or brightness?</li>
+</ol>
+</aside>
+</div>
+<div class="plain-first"><p><strong>Picture three photos of the same kind of house.</strong> They are framed about the same way, but a roof edge or chimney shifts a little. If we compare the same spot in each picture, some spots stay alike and some change.</p></div>
+<div class="house-flow" role="group" aria-labelledby="house-caption">
+<div class="house-stage">
+<h3>1. Three example pictures</h3>
+<p>Same kind of thing; small differences in the outline.</p>
+<div class="house-gallery">
+<figure><svg viewBox="0 0 120 100" role="img" aria-label="House drawing with a low roof"><path class="house-art" d="M17 48 60 19 103 48M25 45v43h70V45M25 88h70M44 61h14v27H44zM69 58h15v14H69z"/></svg><figcaption>Picture A</figcaption></figure>
+<figure><svg viewBox="0 0 120 100" role="img" aria-label="House drawing with a higher roof and chimney"><path class="house-art" d="M17 51 60 13 103 51M25 48v40h70V48M25 88h70M45 62h14v26H45zM71 59h15v14H71zM85 28V16h9v20"/></svg><figcaption>Picture B</figcaption></figure>
+<figure><svg viewBox="0 0 120 100" role="img" aria-label="House drawing with a slightly shifted roof"><path class="house-art" d="M17 45 64 20 103 48M25 45v43h70V46M25 88h70M44 61h14v27H44zM67 60h15v14H67z"/></svg><figcaption>Picture C</figcaption></figure>
+</div>
+</div>
+<div class="house-stage">
+<h3>2. Average picture</h3>
+<p>Where the outlines land in the same place, they build a darker, steadier line. Shifted parts look softer.</p>
+<svg class="house-average" viewBox="0 0 180 130" role="img" aria-label="Three slightly shifted house outlines overlaid to suggest their average">
+<g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path opacity=".28" d="M22 58 90 16 157 58M32 54v62h116V54M32 116h116M68 78h22v38H68zM105 73h22v20h-22z"/>
+<path opacity=".32" d="M22 62 90 10 157 62M32 58v58h116V58M32 116h116M68 78h22v38H68zM105 73h22v20h-22zM128 35V23h11v23"/>
+<path opacity=".28" d="M22 54 96 17 157 58M32 54v62h116V57M32 116h116M68 78h22v38H68zM102 76h22v20h-22z"/>
+</g></svg>
+</div>
+<div class="house-stage">
+<h3>3. Where pictures vary</h3>
+<p>The light, dashed roof marks show places where the example pictures disagree.</p>
+<svg class="house-variation" viewBox="0 0 180 130" role="img" aria-label="House on a dark background with light dashed roof outlines marking high variation">
+<rect x="0" y="0" width="180" height="130" fill="#111"/>
+<g fill="none" stroke="#494949" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 58v58h116M32 116h116M68 78h22v38H68z"/></g>
+<g fill="none" stroke="#e5e5e5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5"><path d="M22 58 90 16 157 58"/><path d="M22 62 90 10 157 62"/><path d="M22 54 96 17 157 58"/><path d="M128 35V23h11v23"/></g>
+</svg>
+</div>
+<p class="house-caption" id="house-caption">A simple house drawing helps explain the idea. The course applies the same comparison to same-sized MNIST pictures, such as handwritten zeros. This drawing is an illustration, not a course output.</p>
+</div>
+<p>Now connect the picture to the maths. Take one exact pixel position across all the pictures of zeros. The <strong>average image</strong> shows the usual brightness at every position. The <strong>standard-deviation image</strong> shows how much brightness changes at each position. The course calls this its “variability image”. In its greyscale display, lighter areas mean the pictures differed more at those spots. This compares pictures with one another—not different parts of just one picture.</p>
+<p>For a tiny example, imagine one pixel has brightness values <code>40, 40, 40</code> in three pictures: the average is 40 and there is no spread. If the values are <code>20, 40, 60</code>, the average is still 40, but the pictures disagree more at that spot.</p>
+<div class="pixel-steps"><p><strong>Same at this spot</strong>If every house has a dark wall line at this position, its average stays dark and the values hardly vary.</p><p><strong>Different at this spot</strong>If a roof edge is here in one picture but a little higher in another, the values disagree. The average softens; variability rises.</p><p><strong>Important</strong>The average is a summary of many pictures. It may look blurred and may not be an actual picture from the collection.</p></div>
+<h3>Now the Python words for it</h3>
+<p>Suppose <code>zero_images</code> contains all the MNIST pictures whose label is <code>0</code>. Its shape has three parts: how many zero pictures there are, then 28 pixel rows, then 28 pixel columns. The example assumes NumPy and the MNIST arrays have already been loaded.</p>
+<div class="code-grid"><div><div class="code-label">Pick the zero pictures, then summarise each pixel</div><pre><code>zero_mask = (y_train == 0)
+zero_images = x_train[zero_mask]
+
+mean_zero = np.mean(zero_images, axis=0)
+spread_zero = np.std(zero_images, axis=0)
+
+print("average image:", mean_zero.shape)
+print("variability image:", spread_zero.shape)</code></pre><div class="code-output"><strong>What this produces</strong>
+average image: (28, 28)
+variability image: (28, 28)</div></div><aside class="code-notes"><h3>Translate it</h3><ol><li><code>y_train == 0</code> asks “is this label a zero?” for every picture. The answers are True or False.</li><li><code>x_train[zero_mask]</code> keeps only pictures whose answer was True.</li><li><code>np.mean(..., axis=0)</code> averages the brightness of each matching pixel. <code>axis=0</code> means compare down the stack of pictures; the count of pictures disappears and the 28-by-28 grid remains.</li><li><code>np.std(..., axis=0)</code> measures how much brightness differs at each matching pixel from picture to picture. That measure of spread is called standard deviation.</li></ol></aside></div>
+<p>The course wraps these steps in <code>image_avg_and_variability_data_as_array()</code>. It repeats them for every label, from 0 to 9, and displays an average beside a variability picture for each digit.</p>
+<div class="code-grid"><div><div class="code-label">Call the course helper for every MNIST label</div><pre><code>image_avg_and_variability_data_as_array(
+    X=x_train,
+    y=y_train,
+    figsize=(12, 5),
+)</code></pre><div class="code-output"><strong>Example notebook output for one label</strong>
+==== Label 0 ====
+Image Shape: (28, 28)
+
+The function continues through labels 1, 2, and so on up to 9.</div></div><aside class="code-notes"><h3>Why use the helper?</h3><p>The helper saves you from writing the same selection, calculation and display instructions ten times. Its parameters are the general inputs; this call supplies the specific arrays <code>x_train</code> and <code>y_train</code>.</p></aside></div>
+<h3>Compare two labels</h3>
+<p>To compare two kinds of picture, first find the average picture for each label. Then subtract the second average from the first, one pixel at a time. The result shows where their average pixel values differ.</p>
+<div class="code-grid">
+<div>
+<div class="code-label">The lesson compares handwritten 8s and 2s</div>
+<pre><code>contrast_between_2_labels_data_as_array(
+    X=x_train,
+    y=y_train,
+    label_1=8,
+    label_2=2,
+    figsize=(12, 10),
+)</code></pre>
+<div class="code-output"><strong>What the function displays</strong>
+1. Difference: average 8 minus average 2
+2. Average image for label 8
+3. Average image for label 2
+
+Here, <code>x_train</code> and <code>y_train</code> are the MNIST digit data.</div>
+</div>
+<aside class="code-notes">
+<h3>How to read the difference</h3>
+<p>At a pixel where both averages match, their difference is zero. A positive result means the average for 8 is brighter there; a negative result means the average for 2 is brighter. The lesson's grey display makes “where do they differ?” easier to see than the direction of that difference.</p>
+</aside>
+</div>
+<p class="plain-first"><strong>For the Fashion-MNIST practice:</strong> use <code>x_practice</code> and <code>y_practice</code> together. In that dataset, label 8 is a bag and label 2 is a pullover. The numbers stay the same, but the pictures they name depend on which dataset is in <code>X</code> and <code>y</code>.</p>
+<div class="code-grid">
+<div>
+<div class="code-label">Use the Fashion-MNIST arrays for the practice</div>
+<pre><code>contrast_between_2_labels_data_as_array(
+    X=x_practice,
+    y=y_practice,
+    label_1=8,
+    label_2=2,
+    figsize=(12, 10),
+)</code></pre>
+<div class="code-output"><strong>Check the pair</strong>
+<code>X=x_practice</code> contains clothing pictures.
+<code>y=y_practice</code> contains their clothing labels.
+8 means bag; 2 means pullover.</div>
+</div>
+<aside class="code-notes">
+<h3>Keep the dataset and labels together</h3>
+<p>If you use <code>x_train</code> with <code>y_train</code>, you are studying digits. If you use <code>x_practice</code> with <code>y_practice</code>, you are studying clothes. Do not mix the image array from one dataset with labels from the other.</p>
+</aside>
+</div>
+</section>
+<section class="section" id="files">
+<div class="section-index">
+<b>03</b>
+<span>Real files</span>
+</div>
+<div class="section-main">
+<h2>Now the pictures come in folders</h2>
+<p class="intro">MNIST was already loaded as matching picture and label arrays. The Chess example starts with an archive file instead. Once it is unpacked, the folder names tell us what kind of chess piece each picture shows.</p>
+<div class="data-stage">
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>folder</th>
+<th>label for its pictures</th>
+<th>what gets counted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Chess/Bishop</code></td>
+<td>Bishop</td>
+<td>image files in this folder</td>
+</tr>
+<tr>
+<td><code>Chess/King</code></td>
+<td>King</td>
+<td>image files in this folder</td>
+</tr>
+<tr>
+<td><code>Chess/Knight</code></td>
+<td>Knight</td>
+<td>image files in this folder</td>
+</tr>
+</tbody>
+</table>
+</div>
+<aside>
+<span class="target-symbol">y</span>
+<p>Every picture inside <code>Chess/Bishop</code> is treated as a Bishop picture. The folder name becomes the label.</p>
+</aside>
+</div>
+<div class="tree">Chess/
+├── Bishop/   → label: Bishop
+├── King/     → label: King
+└── Knight/   → label: Knight</div>
+<div class="code-grid">
+<div>
+<div class="code-label">Open the supplied archive and list its folders</div>
+<pre>
+<code>from zipfile import ZipFile
+
+with ZipFile("Chess.zip", "r") as chessZip:
+    chessZip.extractall()
+
+my_data_dir = "Chess"
+
+import os
+labels = os.listdir(my_data_dir)
+print(labels)</code>
+</pre>
+<div class="code-output"><strong>What is happening</strong>
+<code>ZipFile</code> opens the archive named <code>Chess.zip</code>; <code>extractall()</code> unpacks it in the notebook's current folder. <code>os.listdir("Chess")</code> asks Python to list the items in that one folder.
+
+<code>import os</code> supplies folder tools. It does not download data or search your whole computer.</div>
+</div>
+<aside class="code-notes">
+<h3>Why there are two loops</h3>
+<ol>
+<li>The outside loop chooses a dataset folder.</li>
+<li>Inside it, <code>for label in labels</code> visits Bishop, then King, then Knight.</li>
+<li>Each visit counts the picture files in that one category folder and records its name and count.</li>
+<li>So one Chess folder produces three rows in the little summary table. If there were two dataset folders, the same three checks would happen for each one.</li>
+</ol>
+</aside>
+</div>
+<h3>Why resize the pictures?</h3>
+<p>One Chess picture may be wide and another tall. A single NumPy array needs every picture to have the same height and width, so the helper resizes them before putting them together. Here <code>new_size</code> gives the target height and width; after resizing, all pictures have the same pixel-grid shape.</p>
+<div class="code-grid">
+<div>
+<div class="code-label">Ask the supplied helper for a small sample</div>
+<pre>
+<code>X, y = load_image_as_array(
+    my_data_dir=my_data_dir,
+    new_size=(dim1_mean, dim2_mean),
+    images_amount=2,
+)</code>
+</pre>
+<div class="code-output"><strong>What comes back</strong>
+<code>X</code> contains the resized picture arrays. <code>y</code> contains their labels: Bishop, King or Knight.
+
+The lesson loads just two pictures per label to keep the example small. That is a demonstration sample, not the full dataset.</div>
+</div>
+<aside class="code-notes">
+<h3>Files become arrays</h3>
+<ol>
+<li>Start with separate picture files in labelled folders.</li>
+<li>Resize them so every picture has matching dimensions.</li>
+<li>Put the pixel values together in <code>X</code>.</li>
+<li>Put the matching folder labels in <code>y</code>.</li>
+</ol>
+</aside>
+</div>
+<p class="bridge-note">
+<strong>Next answer:</strong> once the data is in labelled folders or arrays, the next question is how to keep the files separate while a model is developed and finally checked.</p>
+</div>
+</section>
+<section class="section" id="splits">
+<div class="section-index">
+<b>04</b>
+<span>Dataset splits</span>
+</div>
+<div class="section-main">
+<h2>Keep the learning pictures and final check separate</h2>
+<p class="intro">Think of the three groups like school work: the model gets study material, practice checks help you make choices, and a final set stays closed until those choices are finished. Each picture goes into one group only.</p>
+<div class="role-list" aria-label="The three data groups and their jobs">
+<div class="role-row role-head"><strong>Group</strong><span>Think of it as</span><span>When it is used</span></div>
+<div class="role-row"><strong>Train</strong><span data-label="Think of it as">Study material: the model uses these pictures to learn.</span><span data-label="When it is used">Choices are still being developed.</span></div>
+<div class="role-row"><strong>Validation</strong><span data-label="Think of it as">Practice check: use these pictures to compare settings and make development choices.</span><span data-label="When it is used">It can be checked while improving the model.</span></div>
+<div class="role-row"><strong>Test</strong><span data-label="Think of it as">Final check: keep these pictures aside until the choices are settled.</span><span data-label="When it is used">The final estimate comes from pictures not used during those choices.</span></div>
+</div>
+<div class="split-bar" role="img" aria-label="For the Chess example, 65 percent goes to Train, 15 percent to Validation, and 20 percent to Test">
+<span class="split-train">65%<br>Train</span><span class="split-validation">15%<br>Validation</span><span class="split-test">20%<br>Test</span>
+</div>
+<p class="ratio-caption">The Chess example divides the pictures in these proportions. The bar widths match the percentages.</p>
+<p class="plain-first"><strong>Why do the names feel backwards?</strong> For the school analogy, validation is the mock exam: you can check the result and use it to improve your approach. Test is the sealed final exam: keep it aside until the choices are settled. These are machine-learning role names, not the everyday meanings of “test” and “validation”.</p>
+<div class="tree">Before: Chess/Bishop, Chess/King, Chess/Knight
+        ↓ move each picture into exactly one group
+After:  Chess/train, Chess/validation, Chess/test
+        Each destination still has Bishop, King and Knight folders</div>
+<div class="warning">
+<strong>This code moves files.</strong> <code>shutil.move()</code> puts a picture in a different folder. <code>os.rmdir()</code> removes an empty folder. The LMS split code was captured but not run here. Try it only on a spare copy of a dataset, so your original pictures stay safe.</div>
+<div class="code-grid">
+<div>
+<div class="code-label">Chess · divide one set of folders into three groups</div>
+<pre>
+<code>split_train_validation_test_images(
+    my_data_dir="Chess",
+    train_set_ratio=0.65,
+    validation_set_ratio=0.15,
+    test_set_ratio=0.2,
+)</code>
+</pre>
+<div class="code-output"><strong>What the three numbers mean</strong>
+65% of the pictures move to Train.
+15% move to Validation.
+20% move to Test.
+
+Together, the percentages add up to 100%. Each file is moved into one destination.</div>
+</div>
+<aside class="code-notes">
+<h3>What the helper does</h3>
+<ol>
+<li>It handles one label folder at a time.</li>
+<li>It shuffles the picture filenames so their order is not fixed.</li>
+<li>It moves the chosen files into the Train, Validation or Test folder.</li>
+<li>It keeps Bishop, King and Knight subfolders under each group.</li>
+</ol>
+</aside>
+</div>
+<div class="code-grid">
+<div>
+<div class="code-label">COVID example · make Validation from the existing Train group</div>
+<pre>
+<code>split_validation_from_train_set(
+    my_data_dir="Covid19-dataset",
+    train_set_folder_name="train",
+    train_set_ratio=0.8,
+)</code>
+</pre>
+<div class="code-output"><strong>Meaning of 0.8</strong>
+80% of the existing Train pictures stay in Train.
+20% move from Train to Validation.
+The Test group is left as it was.</div>
+</div>
+<aside class="code-notes">
+<h3>Translate the ratio</h3>
+<ol>
+<li>The function starts with the Train folder.</li>
+<li><code>train_set_ratio=0.8</code> means 80% remains there.</li>
+<li>The leftover 20% becomes Validation; Test does not take part in this operation.</li>
+</ol>
+</aside>
+</div>
+</div>
+</section>
+<section class="section" id="checks">
+<div class="section-index">
+<b>05</b>
+<span>Retrieve</span>
+</div>
+<div class="section-main">
+<h2>Say it back in your own words</h2>
+<p class="intro">Try to answer each question before opening its explanation. These checks test the connections between concepts, not just whether the words look familiar.</p>
+<details class="answer-check">
+<summary>What is the relationship between X and y?</summary>
+<p>
+<code>X</code> contains input images. <code>y</code> contains matching labels. The same index connects them.</p>
+</details>
+<details>
+<summary>Why does <code>axis=0</code> leave an image-shaped result?</summary>
+<p>The first dimension is the collection of images. Comparing across that dimension leaves one value for each matching pixel position.</p>
+</details>
+<details>
+<summary>Why does a folder name matter?</summary>
+<p>The folder name is used as the label. <code>Chess/Bishop</code> tells the loader what class those files belong to.</p>
+</details>
+<details>
+<summary>What is the difference between validation and test?</summary>
+<p>Validation is consulted while choices are still being made. Test is held back for the final estimate, so it remains a more honest check of the finished approach.</p>
+</details>
+<details>
+<summary>What happens if you pass x_train to the Fashion-MNIST exercise?</summary>
+<p>Python may run it without an error, but it will show handwritten digits, not clothing. Use the matching Fashion-MNIST arrays <code>x_practice</code> and <code>y_practice</code>.</p>
+</details>
+</div>
+</section>
+<section class="section sources" id="sources">
+<div class="section-index">
+<b>06</b>
+<span>Evidence</span>
+</div>
+<div class="section-main">
+<h2>Source trail and enrichment</h2>
+<p class="intro">The LMS captures remain the lesson record. These official references clarify the Python and data-handling tools used in the captured workflow.</p>
+<ul>
+<li>
+<a href="https://docs.python.org/3/library/zipfile.html">Python <code>zipfile</code>
+</a> — archive extraction.</li>
+<li>
+<a href="https://docs.python.org/3/library/os.html#os.listdir">Python <code>os.listdir()</code>
+</a> — directory inspection.</li>
+<li>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imread.html">Matplotlib <code>imread()</code>
+</a> — image files as arrays.</li>
+<li><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html">Matplotlib <code>imshow()</code></a> — display a two-dimensional pixel array as an image.</li>
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html">NumPy <code>mean()</code></a> and <a href="https://numpy.org/doc/stable/reference/generated/numpy.std.html"><code>std()</code></a> — calculate an average and measure spread along an array dimension.</li>
+<li><a href="https://www.tensorflow.org/api_docs/python/tf/keras/datasets/mnist/load_data">TensorFlow MNIST</a> and <a href="https://www.tensorflow.org/api_docs/python/tf/keras/datasets/fashion_mnist/load_data">Fashion-MNIST</a> — dataset labels and array shapes used in the examples.</li>
+<li>
+<a href="https://www.tensorflow.org/api_docs/python/tf/keras/utils/load_img">Keras <code>load_img()</code>
+</a> and <a href="https://www.tensorflow.org/api_docs/python/tf/keras/utils/img_to_array">
+<code>img_to_array()</code>
+</a> — resizing and conversion.</li>
+<li>
+<a href="https://docs.python.org/3/library/shutil.html#shutil.move">Python <code>shutil.move()</code>
+</a> — why the split functions mutate file locations.</li>
+<li>
+<a href="https://scikit-learn.org/stable/common_pitfalls.html">scikit-learn common pitfalls</a> — leakage and held-out data.</li>
+</ul>
+<div class="source-note">
+<strong>Scope.</strong> This guide covers the captured image-EDA and data-organisation workflow. Computer-vision architectures, augmentation and production pipeline engineering are deliberately deferred.</div>
+</div>
+</section>
+</div>
+<footer class="page-footer">Built from verified LMS captures, with interpretation and primary-source enrichment kept separate. <a href="#top">Return to the top</a>.</footer>
+</main>
+</div>
+</body>
+</html>
